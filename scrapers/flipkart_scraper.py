@@ -51,10 +51,11 @@ def scrape_flipkart(query):
             
             name_tag = (
                 card.select_one("a.wjcEIp") or  # Common for product tiles
-                card.select_one("div.KzDlHZ") or
+                card.select_one("div.KzDlHZ > div") or
                 card.select_one("a.WKTcLC.BwBZTg") or
                 card.select_one("a.VJA4J3") or
-                card.select_one("a.WKTcLC")
+                card.select_one("a.WKTcLC") or
+                card.select_one("div.kv0tEm")
             )
             name = name_tag.get_text(strip=True) if name_tag else "N/A"
 
@@ -83,7 +84,8 @@ def scrape_flipkart(query):
                 card.select_one("div.XQDdHH._6er70b") or
                 card.select_one("div._3LWZlK") or
                 card.select_one("span._1lRcqv") or
-                card.select_one("div._2_R_DZ")
+                card.select_one("div._2_R_DZ") or
+                card.select_one("span.Y1HWO0")
             )
             rating = rating_tag.text.strip() if rating_tag else "N/A"
 

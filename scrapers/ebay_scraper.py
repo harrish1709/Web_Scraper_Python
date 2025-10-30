@@ -41,16 +41,31 @@ def scrape_ebay(query):
             product_url = url_tag['href'] if url_tag else "N/A"
 
             name_tag = (
-                card.select_one(".s-card__title") or card.select_one(".s-item__title")
+                card.select_one(".s-item__title") or
+                card.select_one(".s-card__title") or
+                card.select_one("h3.s-item__title")
             )
-            name = name_tag.get_text(strip=True) if name_tag else "N/A"
-
-            # Remove unwanted text fragments
+            
+            if name_tag:
+                name = name_tag.get_text(" ", strip=True)
+            else:
+                name = "N/A"
+            
+            # Remove unwanted text fragments and marketing tags
             junk_words = [
-                "shop on ebay", "open in new tab", "click to see price", 
-                "see price", "ships for free", "free shipping", "sponsored",
-                "Opens in a new window or tab","SHIPS TODAY","ships today"
+                r"shop on ebay",
+                r"open in new tab",
+                r"click to see price",
+                r"see price",
+                r"ships\s*(today|free|in\s*\d+\s*days)",
+                r"free shipping",
+                r"sponsored",
+                r"opens in a new window or tab",
+                r"new window or tab",
+                r"^new\s*",
+                r"\bfree\b",
             ]
+            
             for junk in junk_words:
                 name = re.sub(junk, "", name, flags=re.IGNORECASE)
 

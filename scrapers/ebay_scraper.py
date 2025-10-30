@@ -48,7 +48,8 @@ def scrape_ebay(query):
             # Remove unwanted text fragments
             junk_words = [
                 "shop on ebay", "open in new tab", "click to see price", 
-                "see price", "ships for free", "free shipping", "sponsored"
+                "see price", "ships for free", "free shipping", "sponsored",
+                "Opens in a new window or tab","SHIPS TODAY","ships today"
             ]
             for junk in junk_words:
                 name = re.sub(junk, "", name, flags=re.IGNORECASE)

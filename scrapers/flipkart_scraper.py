@@ -1,7 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 import time, random, re
 from scrapers.utils import polite_delay, save_to_excel
@@ -49,7 +48,16 @@ def scrape_flipkart(query):
                 card.select_one("a.WKTcLC")
             )
             product_url = "https://www.flipkart.com" + url_tag['href'] if url_tag and url_tag.has_attr("href") else "N/A"
-            name = url_tag.get_text(strip=True) if url_tag else "N/A"
+            
+            name_tag = (
+                card.select_one("a.wjcEIp") or  # Common for product tiles
+                card.select_one("a.KzDlHZ") or
+                card.select_one("a.WKTcLC.BwBZTg") or
+                card.select_one("a.CGtC98") or
+                card.select_one("a.VJA4J3") or
+                card.select_one("a.WKTcLC")
+            )
+            name = name_tag.get_text(strip=True) if name_tag else "N/A"
 
             # Price
             price_tag = (

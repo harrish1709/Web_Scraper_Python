@@ -1,7 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 import time, random, re
 from scrapers.utils import polite_delay, save_to_excel
@@ -42,11 +41,20 @@ def scrape_ebay(query):
             product_url = url_tag['href'] if url_tag else "N/A"
 
             name_tag = (
-                card.select_one(".s-card__title")
+                card.select_one(".s-card__title") or card.select_one(".s-item__title")
             )
             name = name_tag.get_text(strip=True) if name_tag else "N/A"
 
-            if not name or "shop on ebay" in name.lower():
+            # Remove unwanted text fragments
+            junk_words = [
+                "shop on ebay", "open in new tab", "click to see price", 
+                "see price", "ships for free", "free shipping", "sponsored"
+            ]
+            for junk in junk_words:
+                name = re.sub(junk, "", name, flags=re.IGNORECASE)
+
+            name = name.strip()
+            if not name:
                 continue
             
             price_tag = (

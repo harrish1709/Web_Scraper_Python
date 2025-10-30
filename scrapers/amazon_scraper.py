@@ -1,12 +1,10 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 import time, random, re
 from scrapers.utils import polite_delay, save_to_excel
 from datetime import datetime
-
 
 def scrape_amazon(query):
     options = Options()
@@ -42,17 +40,15 @@ def scrape_amazon(query):
 
         for card in product_cards:
             # URL
-            url_tag = card.select_one(
-                "a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal, "
-                "a.a-link-normal.s-no-outline"
-            )
+            url_tag = (card.select_one("a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal")  
+                       or card.select_one("a.a-link-normal.s-no-outline") 
+                       or card.select_one("a.a-link-normal"))
             product_url = "https://www.amazon.in" + url_tag["href"] if url_tag else "N/A"
 
             # Product name
-            name_tag = card.select_one(
-                "h2.a-size-base-plus.a-spacing-none.a-color-base.a-text-normal, "
-                "h2.a-size-medium.a-spacing-none.a-color-base.a-text-normal"
-            )
+            name_tag = (card.select_one("h2.a-size-base-plus.a-spacing-none.a-color-base.a-text-normal") 
+                        or card.select_one("a-size-medium.a-spacing-none.a-color-base.a-text-normal") 
+                        or card.select_one("a-link-normal.s-line-clamp-2.s-line-clamp-3-for-col-12.s-link-style.a-text-normal"))
             name = name_tag.get_text(strip=True) if name_tag else "N/A"
 
             # Price (Amazon India uses ₹)

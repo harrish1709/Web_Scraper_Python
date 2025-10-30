@@ -51,7 +51,7 @@ def scrape_flipkart(query):
             
             name_tag = (
                 card.select_one("a.wjcEIp") or  # Common for product tiles
-                card.select_one("div.KzDlHZ > div") or
+                card.select_one("div.KzDlHZ") or
                 card.select_one("a.WKTcLC.BwBZTg") or
                 card.select_one("a.VJA4J3") or
                 card.select_one("a.WKTcLC") or

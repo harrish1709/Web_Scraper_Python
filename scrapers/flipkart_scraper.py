@@ -80,7 +80,7 @@ def scrape_flipkart(query):
             # Rating
             rating_tag = (
                 card.select_one("div.XQDdHH") or
-                card.select_one("div. XQDdHH._6er70b") or
+                card.select_one("div.XQDdHH._6er70b") or
                 card.select_one("div._3LWZlK") or
                 card.select_one("span._1lRcqv") or
                 card.select_one("div._2_R_DZ")

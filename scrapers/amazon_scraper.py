@@ -8,16 +8,19 @@ from datetime import datetime
 
 def scrape_amazon(query):
     options = Options()
-    options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("--window-size=1920,1080")
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                          "AppleWebKit/537.36 (KHTML, like Gecko) "
                          "Chrome/141.0.7390.122 Safari/537.36")
-
-    # ✅ Chromium & ChromeDriver paths (for Ubuntu)
+    
+    # 🧠 Explicitly set the Chromium binary path
     options.binary_location = "/usr/bin/chromium-browser"
+    
+    # Start ChromeDriver with these options
     driver = webdriver.Chrome(service=Service("/usr/bin/chromedriver"), options=options)
 
     try:

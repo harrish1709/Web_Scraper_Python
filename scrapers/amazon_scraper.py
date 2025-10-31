@@ -42,7 +42,7 @@ def scrape_amazon(query):
     try:
         driver = webdriver.Chrome(service=Service(chromedriver_path), options=options)
 
-    except Exception e:
+    except Exception as e:
         print(e)
         traceback.print_exec()
         return {"error": f"Chrome startup failed: {e}"}

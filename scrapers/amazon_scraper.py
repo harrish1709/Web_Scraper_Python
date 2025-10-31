@@ -98,7 +98,7 @@ def scrape_amazon(query):
             price_nums = re.findall(r"[\\d,]+(?:\\.\\d+)?", raw_price)
             if not price_nums:
                 continue
-            price_value = float(price_nums[0].replace(",", ""))
+            price_value = int(float(price_nums[0].replace(",", "")))
 
             currency_match = re.search(r"([$€£₹]|Rs)", raw_price)
             currency = currency_match.group(0) if currency_match else "NA"

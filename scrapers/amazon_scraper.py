@@ -95,10 +95,15 @@ def scrape_amazon(query):
             # Price
             price_tag = card.select_one("span.a-price > span.a-offscreen") or card.select_one("span.a-color-price")
             raw_price = price_tag.text.strip() if price_tag else "NA"
-            price_nums = re.findall(r"[\\d,]+(?:\\.\\d+)?", raw_price)
+
+            price_nums = [p for p in re.findall(r"[\d,]+(?:\.\d+)?", raw_price) if p.strip()]
             if not price_nums:
-                continue
-            price_value = int(float(price_nums[0].replace(",", "")))
+                continue  # skip invalid/missing prices
+
+            try:
+                price_value = int(float(price_nums[0].replace(",", "")))
+            except ValueError:
+                continue  # skip bad data
 
             currency_match = re.search(r"([$€£₹]|Rs)", raw_price)
             currency = currency_match.group(0) if currency_match else "NA"

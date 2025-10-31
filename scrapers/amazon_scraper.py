@@ -21,19 +21,12 @@ def scrape_amazon(query):
 
     # ✅ Configure Chrome options
     options = Options()
-    options.add_argument("--headless=new")  # modern headless mode
+    options.add_argument("--headless")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("--window-size=1920,1080")
-    options.add_argument("--disable-extensions")
-    options.add_argument("--disable-infobars")
-    options.add_argument("--disable-popup-blocking")
-    options.add_argument("--disable-notifications")
-    options.add_argument("--disable-background-networking")
-    options.add_argument("--disable-sync")
-    options.add_argument("--disable-default-apps")
 
     # 🧠 Randomize user-agent slightly
     ua = random.choice([

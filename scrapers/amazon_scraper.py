@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 import time, random, re, os
 from scrapers.utils import polite_delay, save_to_excel
 from datetime import datetime
-
+import traceback
 
 def scrape_amazon(query):
     # 🔹 Detect paths automatically (Hostinger may vary)
@@ -46,7 +46,13 @@ def scrape_amazon(query):
 
     # 🧩 Explicit binary and driver paths
     options.binary_location = chromium_path
-    driver = webdriver.Chrome(service=Service(chromedriver_path), options=options)
+    try:
+        driver = webdriver.Chrome(service=Service(chromedriver_path), options=options)
+
+    except Exception e:
+        print(e)
+        traceback.print_exec()
+        return {"error": f"Chrome startup failed: {e}"}
 
     # 🕵️ Stealth tweaks (avoid headless detection)
     try:

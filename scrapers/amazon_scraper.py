@@ -20,7 +20,7 @@ def scrape_amazon(query):
     options.binary_location = "/usr/bin/chromium-browser"
     driver = webdriver.Chrome(service=Service("/usr/bin/chromedriver"), options=options)
 
-     try:
+    try:
         polite_delay()
         # Use Amazon India
         url = f"https://www.amazon.in/s?k={query.replace(' ', '+')}"

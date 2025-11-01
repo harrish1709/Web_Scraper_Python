@@ -20,9 +20,8 @@ def index():
     error = None
 
     if request.method == "POST":
-        try:
-            brand = request.form.get("brand", "").strip()
-            website = request.form.get("website", "").lower()
+        brand = request.form.get("brand", "").strip()
+        website = request.form.get("website", "").lower()
 
             file = request.files.get("file")
 

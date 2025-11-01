@@ -22,8 +22,7 @@ def index():
     if request.method == "POST":
         brand = request.form.get("brand", "").strip()
         website = request.form.get("website", "").lower()
-
-            file = request.files.get("file")
+        file = request.files.get("file")
 
             if file:
                 df = pd.read_excel(file) if file.filename.endswith(".xlsx") else pd.read_csv(file)

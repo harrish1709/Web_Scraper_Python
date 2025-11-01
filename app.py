@@ -28,32 +28,29 @@ def index():
 
             if file:
                 df = pd.read_excel(file) if file.filename.endswith(".xlsx") else pd.read_csv(file)
-                for _, row in df.iterrows():
-                    brand = str(row.get("Brand", "")).strip()
-                    site = str(row.get("Website Name", "")).lower().strip()
-                    if not brand or site not in SCRAPERS:
+                df = df.dropna(subset=["Brand", "Website Name"])
+                results = []
+            
+                for site, rows in df.groupby("Website Name"):
+                    site = site.lower().strip()
+                    if site not in SCRAPERS:
                         continue
-                    scraper = SCRAPERS[site]
-                    data = scraper(brand)
-                    if "error" not in data:
-                        for d in data["data"]:
-                            d["WEBSITE"] = site.capitalize()
-                            results.append(d)
-
-            elif brand and website in SCRAPERS:
-                scraper = SCRAPERS[website]
-                data = scraper(brand)
-                if "error" in data:
-                    error = data["error"]
-                else:
-                    for d in data["data"]:
-                        d["WEBSITE"] = website.capitalize()
-                        results.append(d)
-            else:
-                error = "Please provide valid input or upload a valid file."
-
-        except Exception as e:
-            error = f"Error: {str(e)}"
+            
+                    print(f"Scraping {site} for {len(rows)} brands")
+                    brands = [str(b).strip() for b in rows["Brand"].tolist() if str(b).strip()]
+                    try:
+                        # reuse one driver per site
+                        scraper_func = SCRAPERS[site]
+                        for brand in brands:
+                            data = scraper_func(brand)
+                            if "data" in data:
+                                for d in data["data"]:
+                                    d["WEBSITE"] = site.capitalize()
+                                    results.append(d)
+                            polite_delay()
+                    except Exception as e:
+                        print(f"Error on {site}: {e}")
+                        continue
 
     return render_template("index.html", results=results, error=error)
 

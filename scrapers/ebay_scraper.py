@@ -26,7 +26,16 @@ def scrape_ebay(query):
 
     try:
         polite_delay()
-        url = f"https://www.ebay.com/sch/i.html?_nkw={query.replace(' ', '+')}"
+        # 🧩 Build dynamic search query
+        if asin_number:
+            # Some sellers may list ASINs directly in the title
+            keywords = [brand, product, asin_number]
+        else:
+            keywords = [brand, product, oem_number] if oem_number else [brand, product]
+
+        query = "+".join([k for k in keywords if k])
+        url = f"https://www.ebay.com/sch/i.html?_nkw={query}"
+
         driver.get(url)
 
         time.sleep(random.uniform(3, 6))
@@ -37,7 +46,7 @@ def scrape_ebay(query):
         scraped_data = []
 
         for card in product_cards:
-            url_tag = card.select_one("a.s-card__link")
+            url_tag = card.select_one("a.su-link")
             product_url = url_tag['href'] if url_tag else "N/A"
 
             name_tag = (
@@ -91,21 +100,31 @@ def scrape_ebay(query):
             rating_text = rating_match.group(0) if rating_match else "N/A"
 
             scraped_data.append({
-                "SOURCE URL": product_url,
+                "BRAND": brand,
+                "PRODUCT": product,
+                "OEM NUMBER": oem_number or "NA",
+                "ASIN NUMBER": asin_number or "NA",
+                "WEBSITE": "eBay",
                 "PRODUCT NAME": name,
                 "PRICE": price_value,
                 "CURRENCY": currency,
                 "SELLER RATING": rating_text,
-                "DATE SCRAPED": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                "DATE SCRAPED": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "SOURCE URL": product_url,
             })
 
         if not scraped_data:
             return {"error": "No data scraped — page may have loaded incorrectly or no items matched."}
 
-        save_to_excel("eBay", scraped_data)
-        return{"data": scraped_data}
+        try:
+            save_to_excel("Flipkart", scraped_data)
+        except Exception:
+            pass
+
+        return {"data": scraped_data}
 
     except Exception as e:
         return {"error": str(e)}
+
     finally:
         driver.quit()

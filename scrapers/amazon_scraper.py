@@ -96,35 +96,36 @@ def scrape_amazon(query, max_retries: int = 3, headless: bool = True):
             try:
                 driver.get("https://www.amazon.in/")
                 time.sleep(random.uniform(1.2, 2.8))
-                # Accept possible consent popups by attempting to click common selectors (non-fatal)
-                try:
-                    # site-specific, safe to ignore if not present
-                    for selector in ["#sp-cc-accept", "input[name='accept']"]:
-                        try:
-                            el = driver.find_element(By.CSS_SELECTOR, selector)
-                            el.click()
-                            time.sleep(0.5)
-                        except Exception:
-                            pass
-                except Exception:
-                    pass
+                for selector in ["#sp-cc-accept", "input[name='accept']"]:
+                    try:
+                        el = driver.find_element(By.CSS_SELECTOR, selector)
+                        el.click()
+                        time.sleep(0.5)
+                    except Exception:
+                        pass
             except Exception:
-                # ignore warmup failures
                 pass
 
-            # polite delay before searching
             polite_delay()
 
-            search_url = f"https://www.amazon.in/s?k={query.replace(' ', '+')}"
+            # 🧩 Build search URL
+            if asin_number:
+                # Direct ASIN lookup page
+                search_url = f"https://www.amazon.in/dp/{asin_number}"
+            else:
+                keywords = [brand, product]
+                if oem_number:
+                    keywords.append(oem_number)
+                query = "+".join([k for k in keywords if k])
+                search_url = f"https://www.amazon.in/s?k={query}"
+
             driver.get(search_url)
 
-            # wait dynamic search results
             try:
                 WebDriverWait(driver, 18).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, "div[data-component-type='s-search-result']"))
                 )
             except Exception:
-                # fallback: small scroll & wait for render
                 try:
                     driver.execute_script("window.scrollTo(0, document.body.scrollHeight/4);")
                 except Exception:
@@ -133,20 +134,21 @@ def scrape_amazon(query, max_retries: int = 3, headless: bool = True):
 
             html = driver.page_source
 
-            # quick robot/captcha detection
-            if "Enter the characters you see below" in html or "To discuss automated access to Amazon" in html or "automated access" in html:
-                # blocked — close and retry with a new UA and slight backoff
+            # Captcha or block detection
+            if (
+                "Enter the characters you see below" in html
+                or "automated access" in html
+                or "To discuss automated access to Amazon" in html
+            ):
                 driver.quit()
-                sleep_for = random.uniform(6, 14) * attempt
-                time.sleep(sleep_for)
+                time.sleep(random.uniform(6, 14) * attempt)
                 continue
 
-            # parse with the exact selectors you provided originally
             soup = BeautifulSoup(html, "html.parser")
             product_cards = soup.select("div[data-component-type='s-search-result']")
 
             for card in product_cards:
-                # URL
+                # Product URL
                 url_tag = card.select_one(
                     "a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal"
                 ) or card.select_one("a.a-link-normal.s-no-outline")
@@ -164,9 +166,7 @@ def scrape_amazon(query, max_retries: int = 3, headless: bool = True):
 
                 price_nums = [p for p in re.findall(r"[\d,]+(?:\.\d+)?", raw_price) if p.strip()]
                 if not price_nums:
-                    # skip items without price (mirrors your original)
                     continue
-
                 try:
                     price_value = int(float(price_nums[0].replace(",", "")))
                 except ValueError:
@@ -177,34 +177,38 @@ def scrape_amazon(query, max_retries: int = 3, headless: bool = True):
 
                 # Rating
                 rating_tag = card.select_one("span.a-icon-alt")
-                rating = rating_tag.get_text(strip=True).replace("out of 5 stars", "").strip() if rating_tag else "N/A"
+                rating = (
+                    rating_tag.get_text(strip=True).replace("out of 5 stars", "").strip() if rating_tag else "N/A"
+                )
 
                 scraped_data.append({
-                    "SOURCE URL": product_url,
+                    "BRAND": brand,
+                    "PRODUCT": product,
+                    "OEM NUMBER": oem_number or "NA",
+                    "ASIN NUMBER": asin_number or "NA",
+                    "WEBSITE": "Amazon",
                     "PRODUCT NAME": name,
                     "PRICE": price_value,
                     "CURRENCY": currency,
                     "SELLER RATING": rating,
-                    "DATE SCRAPED": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    "DATE SCRAPED": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "SOURCE URL": product_url,
                 })
 
-            # if scraped_data found, persist and return
+            # ✅ Return data if found
             if scraped_data:
                 try:
                     save_to_excel("Amazon", scraped_data)
                 except Exception:
-                    # don't fail the scrape if saving errors
                     pass
                 driver.quit()
                 return {"data": scraped_data}
             else:
-                # no items found — possible render issue; retry
                 driver.quit()
                 time.sleep(random.uniform(4, 10))
                 continue
 
         except Exception as e:
-            # attempt failed, log and retry
             try:
                 traceback.print_exc()
             except Exception:
@@ -216,5 +220,7 @@ def scrape_amazon(query, max_retries: int = 3, headless: bool = True):
             time.sleep(random.uniform(4, 12) * attempt)
             continue
 
-    # all attempts exhausted
-    return {"error": "Blocked or failed after retries — consider using proxies or a scraping API for higher reliability."}
+    # All retries failed
+    return {
+        "error": "Blocked or failed after multiple retries — consider rotating proxies or using a scraping API."
+    }

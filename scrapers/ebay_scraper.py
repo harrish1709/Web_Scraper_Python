@@ -6,7 +6,7 @@ import time, random, re
 from scrapers.utils import polite_delay, save_to_excel
 from datetime import datetime
 
-def scrape_ebay(query):
+def scrape_ebay(brand, product, oem_number=None, asin_number=None):
     options = Options()
     options.add_argument("--headless") # ✅ Run in headless mode
     options.add_argument("--no-sandbox")

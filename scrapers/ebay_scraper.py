@@ -37,7 +37,7 @@ def scrape_ebay(query):
         scraped_data = []
 
         for card in product_cards:
-            url_tag = card.select_one("a.su-link")
+            url_tag = card.select_one("a.s-card__link")
             product_url = url_tag['href'] if url_tag else "N/A"
 
             name_tag = (

@@ -7,7 +7,7 @@ from scrapers.utils import polite_delay, save_to_excel
 from datetime import datetime
 
 
-def scrape_snapdeal(query):
+def scrape_snapdeal(brand, product, oem_number=None, asin_number=None):
     options = Options()
     options.add_argument("--headless") # ✅ Run in headless mode
     options.add_argument("--no-sandbox")
@@ -27,10 +27,19 @@ def scrape_snapdeal(query):
 
     try:
         polite_delay()
-        url = f"https://www.snapdeal.com/search?keyword={query.replace(' ', '%20')}"
+
+        # ---- Build dynamic search query ----
+        if asin_number:
+            keywords = [brand, product, asin_number]
+        else:
+            keywords = [brand, product, oem_number] if oem_number else [brand, product]
+
+        query = "%20".join([k for k in keywords if k])
+        url = f"https://www.snapdeal.com/search?keyword={query}"
+
         driver.get(url)
 
-        # Wait for dynamic content to load
+        # Wait for dynamic content
         time.sleep(random.uniform(5, 10))
 
         soup = BeautifulSoup(driver.page_source, "html.parser")
@@ -38,67 +47,80 @@ def scrape_snapdeal(query):
 
         scraped_data = []
 
+        # ---- Parse product listings ----
         for card in product_cards:
             # Product URL
             url_tag = card.select_one("a.dp-widget-link, a.dp-widget-link.noUdLine")
-            product_url = url_tag['href'] if url_tag else "N/A"
+            product_url = url_tag["href"] if url_tag else "N/A"
 
-            # Product name
+            # Product Name
             name_tag = card.select_one(".product-title")
             name = name_tag.get_text(strip=True) if name_tag else "N/A"
+            if not name or name.lower() in ["sponsored", "advertisement"]:
+                continue
 
-            # Price extraction
+            # ---- Price ----
             price_tag = (
-                card.select_one("span.lfloat.product-price")
-                or card.select_one("span[id^='display-price']")
-                or card.select_one(".product-price > span")
+                card.select_one("span.lfloat.product-price") or
+                card.select_one("span[id^='display-price']") or
+                card.select_one(".product-price > span")
             )
 
             if price_tag:
-                # Prefer data-price attribute (clean number)
                 if price_tag.has_attr("data-price"):
-                    price = price_tag["data-price"].strip()
+                    price_text = price_tag["data-price"].strip()
                 else:
-                    raw_price = price_tag.get_text(strip=True)
-                    price = re.sub(r"[^\d.]", "", raw_price)
+                    price_text = re.sub(r"[^\d.]", "", price_tag.get_text(strip=True))
             else:
-                price = "0"
+                price_text = "0"
 
-            # --- CURRENCY ---
+            try:
+                price_value = int(float(price_text))
+            except ValueError:
+                continue
+
+            # ---- Currency ----
             currency_match = re.search(r"(Rs\.?|₹|[$€£])", price_tag.text if price_tag else "")
-            currency = currency_match.group(0) if currency_match else "NA"
+            currency = currency_match.group(0) if currency_match else "₹"
 
-            # Rating (based on filled-stars width)
+            # ---- Rating ----
             rating_tag = card.select_one(".filled-stars")
             if rating_tag and "width" in rating_tag.attrs.get("style", ""):
                 try:
                     width = float(rating_tag["style"].split(":")[1].replace("%", "").strip())
                     rating = f"{round(width / 20, 1)}"
-                except:
+                except Exception:
                     rating = "N/A"
             else:
                 rating = "N/A"
 
-            try:
-                price = int(float(price))
-            except:
-                continue
-
+            # ---- Append structured data ----
             scraped_data.append({
-                "SOURCE URL": product_url,
+                "BRAND": brand,
+                "PRODUCT": product,
+                "OEM NUMBER": oem_number or "NA",
+                "ASIN NUMBER": asin_number or "NA",
+                "WEBSITE": "Snapdeal",
                 "PRODUCT NAME": name,
-                "PRICE": price,
+                "PRICE": price_value,
                 "CURRENCY": currency,
                 "SELLER RATING": rating,
-                "DATE SCRAPED": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                "DATE SCRAPED": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "SOURCE URL": product_url,
             })
 
+        # ---- Validation ----
         if not scraped_data:
             return {"error": "No data scraped — page may have loaded incorrectly or no items matched."}
 
-        save_to_excel("Snapdeal", scraped_data)
-        return{"data": scraped_data}
-    
+        # ---- Save and Return ----
+        try:
+            save_to_excel("Snapdeal", scraped_data)
+        except Exception:
+            pass
+
+        return {"data": scraped_data}
+
     except Exception as e:
         return {"error": str(e)}
 

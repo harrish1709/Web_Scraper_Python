@@ -59,7 +59,8 @@ def scrape_amazon(brand, product, oem_number=None, asin_number=None):
     Scrape Amazon.in search results using undetected_chromedriver with stealth tweaks.
     Returns dict: {"data": [...]} or {"error": "msg"}
     """
-    max_retries = 3, headless = True
+    max_retries = 3
+    headless = True
     scraped_data = []
 
     for attempt in range(1, max_retries + 1):

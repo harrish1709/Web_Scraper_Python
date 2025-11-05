@@ -132,13 +132,16 @@ def scrape_amazon(brand, product, oem_number=None, asin_number=None, max_retries
                         pass
                     time.sleep(random.uniform(4.5, 8.5))
     
-                html = driver.page_source
-    
+                html = driver.page_source or ""
+
                 # Captcha or block detection
-                if (
-                    "Enter the characters you see below" in html
-                    or "automated access" in html
-                    or "To discuss automated access to Amazon" in html
+                if any(
+                    phrase in html
+                    for phrase in [
+                        "Enter the characters you see below",
+                        "automated access",
+                        "To discuss automated access to Amazon"
+                    ]
                 ):
                     driver.quit()
                     time.sleep(random.uniform(6, 14) * attempt)

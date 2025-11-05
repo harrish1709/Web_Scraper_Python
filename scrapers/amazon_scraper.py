@@ -54,7 +54,7 @@ def _random_viewport_size():
     heights = [800, 768, 900, 1024, 1080]
     return random.choice(widths), random.choice(heights)
 
-def scrape_amazon(brand,product,oem=None,asin=None):
+def scrape_amazon(brand, product, oem_number=None, asin_number=None):
     """
     Scrape Amazon.in search results using undetected_chromedriver with stealth tweaks.
     Returns dict: {"data": [...]} or {"error": "msg"}

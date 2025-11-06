@@ -58,7 +58,9 @@ def index():
                         else:
                             error = data["error"]
 
-                time.sleep(random.uniform(10, 25))
+                        # If site was Amazon, wait longer before moving to the next product row
+                        if site_name == "amazon":
+                            time.sleep(random.uniform(10, 25))
 
             # --- Manual Input ---
             else:

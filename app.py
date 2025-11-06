@@ -50,7 +50,11 @@ def index():
                         if site_name not in SCRAPERS:
                             continue
                         scraper = SCRAPERS[site_name]
-                        data = scraper(brand, product, oem, asin)
+
+                        if site_name == "amazon":
+                            data = scraper(brand,product)
+                        else:
+                            data = scraper(brand, product, oem, asin)
 
                         if "error" not in data:
                             for d in data["data"]:
@@ -59,9 +63,9 @@ def index():
                         else:
                             error = data["error"]
 
-                        # If site was Amazon, wait longer before moving to the next product row
                         if site_name == "amazon":
-                            time.sleep(random.uniform(10, 25))
+                            wait = random.uniform(10, 25)
+                            time.sleep(wait)
 
             # --- Manual Input ---
             else:

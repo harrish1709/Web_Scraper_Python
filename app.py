@@ -58,6 +58,8 @@ def index():
                         else:
                             error = data["error"]
 
+                time.sleep(random.uniform(10, 25))
+
             # --- Manual Input ---
             else:
                 # Require brand and product for manual entry

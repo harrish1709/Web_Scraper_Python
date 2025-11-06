@@ -54,7 +54,7 @@ def _random_viewport_size():
     heights = [800, 768, 900, 1024, 1080]
     return random.choice(widths), random.choice(heights)
 
-def scrape_amazon(brand, product, oem_number=None, asin_number=None):
+def scrape_amazon(brand, product):
     """
     Scrape Amazon.in search results using undetected_chromedriver with stealth tweaks.
     Returns dict: {"data": [...]} or {"error": "msg"}
@@ -62,6 +62,8 @@ def scrape_amazon(brand, product, oem_number=None, asin_number=None):
     max_retries = 3
     headless = True
     scraped_data = []
+    oem_number=None
+    asin_number=None
 
     for attempt in range(1, max_retries + 1):
         ua = random.choice(USER_AGENTS)
@@ -117,16 +119,9 @@ def scrape_amazon(brand, product, oem_number=None, asin_number=None):
             # polite delay before searching
             polite_delay()
 
-            # 🧩 Build search URL
-            if asin_number:
-                # Direct ASIN lookup page
-                search_url = f"https://www.amazon.in/dp/{asin_number}"
-            else:
-                keywords = [brand, product]
-                if oem_number:
-                    keywords.append(oem_number)
-                query = "+".join([k for k in keywords if k])
-                search_url = f"https://www.amazon.in/s?k={query}"
+            # 🧩 Build simplified search URL (only brand + product)
+            query = "+".join([k for k in [brand, product] if k])
+            search_url = f"https://www.amazon.in/s?k={query}"
     
             driver.get(search_url)
 

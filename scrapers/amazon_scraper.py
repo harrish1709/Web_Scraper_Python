@@ -233,5 +233,5 @@ def scrape_amazon(brand, product, oem_number=None, asin_number=None):
                 time.sleep(random.uniform(4, 12) * attempt)
                 continue
 
-        # all attempts exhausted
-        return {"error": "Blocked or failed after retries — consider using proxies or a scraping API for higher reliability."}
+    # all attempts exhausted
+    return {"error": "Blocked or failed after retries — consider using proxies or a scraping API for higher reliability."}

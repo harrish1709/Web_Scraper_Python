@@ -230,8 +230,8 @@ def scrape_amazon(brand, product, oem_number=None, asin_number=None):
                 driver.quit()
             except Exception:
                 pass
-                time.sleep(random.uniform(4, 12) * attempt)
-                continue
+            time.sleep(random.uniform(4, 12) * attempt)
+            continue
 
     # all attempts exhausted
     return {"error": "Blocked or failed after retries — consider using proxies or a scraping API for higher reliability."}

@@ -4,6 +4,7 @@ from scrapers.amazon_scraper import scrape_amazon
 from scrapers.flipkart_scraper import scrape_flipkart
 from scrapers.ebay_scraper import scrape_ebay
 from scrapers.snapdeal_scraper import scrape_snapdeal
+import time
 
 app = Flask(__name__)
 

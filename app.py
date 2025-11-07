@@ -79,8 +79,12 @@ def index():
                         if site not in SCRAPERS:
                             continue
                         scraper = SCRAPERS[site]
-                        data = scraper(brand, product, oem_number, asin_number)
-
+                        
+                        if site_name == "amazon":
+                            data = scraper(brand,product)
+                        else:
+                            data = scraper(brand, product, oem, asin)
+                            
                         if "error" in data:
                             error = data["error"]
                         else:

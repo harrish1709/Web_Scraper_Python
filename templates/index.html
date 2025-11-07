@@ -119,7 +119,7 @@
               <input type="text" name="asin_number" class="form-control" placeholder="e.g., B0CXYZ123">
             </div>
             <div class="mb-3">
-              <label class="form-label fw-semibold">Website (optional)</label>
+              <label class="form-label fw-semibold">Website</label>
               <select name="website" class="form-select">
                 <option value="">-- All Websites --</option>
                 <option value="amazon">Amazon</option>
@@ -127,6 +127,32 @@
                 <option value="ebay">eBay</option>
                 <option value="snapdeal">Snapdeal</option>
               </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Country Code (For Amazon)</label>
+              <select name="country_code" class="form-select">
+                <option value="">-- Default (US) --</option>
+                <option value="IN">India (.in)</option>
+                <option value="US">United States (.com)</option>
+                <option value="AE">United Arab Emirates (.ae)</option>
+                <option value="SA">Saudi Arabia (.sa)</option>
+                <option value="UK">United Kingdom (.co.uk)</option>
+                <option value="DE">Germany (.de)</option>
+                <option value="FR">France (.fr)</option>
+                <option value="IT">Italy (.it)</option>
+                <option value="ES">Spain (.es)</option>
+                <option value="JP">Japan (.co.jp)</option>
+                <option value="CA">Canada (.ca)</option>
+                <option value="AU">Australia (.com.au)</option>
+                <option value="BR">Brazil (.com.br)</option>
+                <option value="MX">Mexico (.mx)</option>
+                <option value="NL">Netherlands (.nl)</option>
+                <option value="SE">Sweden (.se)</option>
+                <option value="SG">Singapore (.sg)</option>
+                <option value="TR">Turkey (.com.tr)</option>
+                <option value="PL">Poland (.pl)</option>
+              </select>
+              <small class="text-muted">Applies only when scraping Amazon</small>
             </div>
             <button type="submit" class="btn btn-primary w-100">
               <i class="bi bi-search me-2"></i>Search Product

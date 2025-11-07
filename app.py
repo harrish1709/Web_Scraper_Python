@@ -64,7 +64,8 @@ def index():
                             error = data["error"]
 
                         if site_name == "amazon":
-                            time.sleep(random.uniform(10, 25))
+                            wait = random.uniform(10, 25)
+                            time.sleep(wait)
 
             # --- Manual Input ---
             else:

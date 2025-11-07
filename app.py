@@ -83,7 +83,7 @@ def index():
                         if site == "amazon":
                             data = scraper(brand,product)
                         else:
-                            data = scraper(brand, product, oem, asin)
+                            data = scraper(brand, product, oem_number, asin_number)
                             
                         if "error" in data:
                             error = data["error"]

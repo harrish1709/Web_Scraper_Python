@@ -67,10 +67,6 @@ def _random_viewport_size():
     return random.choice(widths), random.choice(heights)
 
 def scrape_amazon(country_code, brand, product):
-    """
-    Universal Amazon scraper for 20+ country domains.
-    Returns dict: {"data": [...]} or {"error": "msg"}
-    """
     max_retries = 3
     headless = True
     scraped_data = []
@@ -158,7 +154,7 @@ def scrape_amazon(country_code, brand, product):
                 if not price_nums:
                     continue
                 try:
-                    price_value = float(price_nums[0].replace(",", ""))
+                    price_value = int(float(price_nums[0].replace(",", "")))
                 except ValueError:
                     continue
 
@@ -170,7 +166,7 @@ def scrape_amazon(country_code, brand, product):
                     r'[A-Z]{3}'
                     r')', raw_price
                 )
-                currency = currency_match.group(0) if currency_match else "NA"
+                currency_symbol = currency_match.group(0) if currency_match else "NA"
 
                 rating_tag = card.select_one("span.a-icon-alt")
                 rating = rating_tag.get_text(strip=True).replace("out of 5 stars", "").strip() if rating_tag else "N/A"
@@ -183,7 +179,7 @@ def scrape_amazon(country_code, brand, product):
                     "WEBSITE": f"Amazon.{domain.split('.')[-1]}",
                     "PRODUCT NAME": name,
                     "PRICE": price_value,
-                    "CURRENCY": currency,
+                    "CURRENCY": currency_symbol,
                     "SELLER RATING": rating,
                     "DATE SCRAPED": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                     "SOURCE URL": product_url,

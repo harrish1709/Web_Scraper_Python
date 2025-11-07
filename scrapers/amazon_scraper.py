@@ -18,25 +18,25 @@ USER_AGENTS = [
 
 # 🌍 Amazon domain mapping
 AMAZON_DOMAINS = {
-    "IN": "amazon.in",
-    "US": "amazon.com",
-    "AE": "amazon.ae",
-    "SA": "amazon.sa",
-    "UK": "amazon.co.uk",
-    "DE": "amazon.de",
-    "FR": "amazon.fr",
-    "IT": "amazon.it",
-    "ES": "amazon.es",
-    "JP": "amazon.co.jp",
-    "CA": "amazon.ca",
-    "AU": "amazon.com.au",
-    "BR": "amazon.com.br",
-    "MX": "amazon.mx",
-    "NL": "amazon.nl",
-    "SE": "amazon.se",
-    "SG": "amazon.sg",
-    "TR": "amazon.com.tr",
-    "PL": "amazon.pl",
+    "IN": "www.amazon.in",
+    "US": "www.amazon.com",
+    "AE": "www.amazon.ae",
+    "SA": "www.amazon.sa",
+    "UK": "www.amazon.co.uk",
+    "DE": "www.amazon.de",
+    "FR": "www.amazon.fr",
+    "IT": "www.amazon.it",
+    "ES": "www.amazon.es",
+    "JP": "www.amazon.co.jp",
+    "CA": "www.amazon.ca",
+    "AU": "www.amazon.com.au",
+    "BR": "www.amazon.com.br",
+    "MX": "www.amazon.mx",
+    "NL": "www.amazon.nl",
+    "SE": "www.amazon.se",
+    "SG": "www.amazon.sg",
+    "TR": "www.amazon.com.tr",
+    "PL": "www.amazon.pl",
 }
 
 def _stealth_hook(driver, user_agent):
@@ -206,4 +206,4 @@ def scrape_amazon(country_code, brand, product):
             time.sleep(random.uniform(4, 12) * attempt)
             continue
 
-    return {"error": f"Blocked or failed after retries for Amazon.{domain}"}
+    return {"error": f"Blocked or failed after retries for {domain}"}

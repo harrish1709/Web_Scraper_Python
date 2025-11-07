@@ -14,39 +14,51 @@ USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Safari/605.1.15",
-    # add more if desired
 ]
 
+# 🌍 Amazon domain mapping
+AMAZON_DOMAINS = {
+    "IN": "amazon.in",
+    "US": "amazon.com",
+    "AE": "amazon.ae",
+    "SA": "amazon.sa",
+    "UK": "amazon.co.uk",
+    "DE": "amazon.de",
+    "FR": "amazon.fr",
+    "IT": "amazon.it",
+    "ES": "amazon.es",
+    "JP": "amazon.co.jp",
+    "CA": "amazon.ca",
+    "AU": "amazon.com.au",
+    "BR": "amazon.com.br",
+    "MX": "amazon.mx",
+    "NL": "amazon.nl",
+    "SE": "amazon.se",
+    "SG": "amazon.sg",
+    "TR": "amazon.com.tr",
+    "PL": "amazon.pl",
+}
+
 def _stealth_hook(driver, user_agent):
-    """
-    Apply runtime JS tweaks to reduce detection surface.
-    Keep this minimal and targeted.
-    """
+    """Apply runtime JS tweaks to reduce detection surface."""
     try:
-        # set languages
         driver.execute_script("Object.defineProperty(navigator, 'languages', {get: () => ['en-US', 'en']});")
-        # plugins
         driver.execute_script("Object.defineProperty(navigator, 'plugins', {get: () => [1,2,3,4,5]});")
-        # webdriver flag
         driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined});")
-        # chrome runtime (some checks)
         driver.execute_script(
-            "window.chrome = { runtime: {},  // minimal chrome object\n  loadTimes: function(){return {}} };"
+            "window.chrome = { runtime: {}, loadTimes: function(){return {}} };"
         )
-        # permissions mock
         driver.execute_script("""
             const originalQuery = window.navigator.permissions.query;
             window.navigator.permissions.__query = originalQuery;
             window.navigator.permissions.query = (parameters) => (
-              parameters.name === 'notifications' ?
-                Promise.resolve({ state: Notification.permission }) :
-                originalQuery(parameters)
+              parameters.name === 'notifications'
+                ? Promise.resolve({ state: Notification.permission })
+                : originalQuery(parameters)
             );
         """)
-        # override userAgent via navigator (in addition to options)
         driver.execute_script(f"Object.defineProperty(navigator, 'userAgent', {{get: () => '{user_agent}'}});")
     except Exception:
-        # don't fail if any tweak errors
         pass
 
 def _random_viewport_size():
@@ -54,16 +66,18 @@ def _random_viewport_size():
     heights = [800, 768, 900, 1024, 1080]
     return random.choice(widths), random.choice(heights)
 
-def scrape_amazon(brand, product):
+def scrape_amazon(country_code, brand, product):
     """
-    Scrape Amazon.in search results using undetected_chromedriver with stealth tweaks.
+    Universal Amazon scraper for 20+ country domains.
     Returns dict: {"data": [...]} or {"error": "msg"}
     """
     max_retries = 3
     headless = True
     scraped_data = []
-    oem_number=None
-    asin_number=None
+    oem_number = None
+    asin_number = None
+
+    domain = AMAZON_DOMAINS.get(country_code.upper(), "amazon.com")
 
     for attempt in range(1, max_retries + 1):
         ua = random.choice(USER_AGENTS)
@@ -71,156 +85,124 @@ def scrape_amazon(brand, product):
 
         try:
             options = uc.ChromeOptions()
-            # headless mode: undetected-chromedriver supports 'headless=new' in newer chrome
             if headless:
                 options.add_argument("--headless=new")
-            # common safe flags
             options.add_argument("--no-sandbox")
             options.add_argument("--disable-dev-shm-usage")
             options.add_argument("--disable-gpu")
             options.add_argument("--disable-blink-features=AutomationControlled")
             options.add_argument(f"--user-agent={ua}")
             options.add_argument(f"--window-size={width},{height}")
-            # less suspicious: disable extensions not needed
             options.add_argument("--disable-extensions")
             options.add_argument("--disable-background-networking")
-            # minimal logging
             options.add_argument("--log-level=3")
 
-            # If your VPS has chrome binary in a non-standard path, set options.binary_location before Chrome() call:
-            # options.binary_location = "/usr/bin/chromium-browser"
-
-            driver = uc.Chrome(options=options)  # uc will manage driver binary
+            driver = uc.Chrome(options=options)
             driver.set_page_load_timeout(45)
-
-            # apply stealth hook to overwrite some navigator properties
             _stealth_hook(driver, ua)
 
-            # small human-like warmup navigation
+            # Warmup navigation
             try:
-                driver.get("https://www.amazon.in/")
+                driver.get(f"https://{domain}/")
                 time.sleep(random.uniform(1.2, 2.8))
-                # Accept possible consent popups by attempting to click common selectors (non-fatal)
-                try:
-                    # site-specific, safe to ignore if not present
-                    for selector in ["#sp-cc-accept", "input[name='accept']"]:
-                        try:
-                            el = driver.find_element(By.CSS_SELECTOR, selector)
-                            el.click()
-                            time.sleep(0.5)
-                        except Exception:
-                            pass
-                except Exception:
-                    pass
+                for selector in ["#sp-cc-accept", "input[name='accept']"]:
+                    try:
+                        el = driver.find_element(By.CSS_SELECTOR, selector)
+                        el.click()
+                        time.sleep(0.5)
+                    except Exception:
+                        pass
             except Exception:
-                # ignore warmup failures
                 pass
 
-            # polite delay before searching
             polite_delay()
 
-            # 🧩 Build simplified search URL (only brand + product)
+            # 🔍 Build search URL
             query = "+".join([k for k in [brand, product] if k])
-            search_url = f"https://www.amazon.in/s?k={query}"
-    
+            search_url = f"https://{domain}/s?k={query}"
+
             driver.get(search_url)
 
-            # wait dynamic search results
             try:
                 WebDriverWait(driver, 18).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, "div[data-component-type='s-search-result']"))
                 )
             except Exception:
-                # fallback: small scroll & wait for render
-                try:
-                    driver.execute_script("window.scrollTo(0, document.body.scrollHeight/4);")
-                except Exception:
-                    pass
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight/4);")
                 time.sleep(random.uniform(4.5, 8.5))
 
             html = driver.page_source
 
-            # quick robot/captcha detection
-            if "Enter the characters you see below" in html or "To discuss automated access to Amazon" in html or "automated access" in html:
-                # blocked — close and retry with a new UA and slight backoff
+            # Captcha / block detection
+            if any(x in html for x in ["Enter the characters you see below", "automated access", "To discuss automated access to Amazon"]):
                 driver.quit()
-                sleep_for = random.uniform(6, 14) * attempt
-                time.sleep(sleep_for)
+                time.sleep(random.uniform(6, 14) * attempt)
                 continue
 
-            # parse with the exact selectors you provided originally
             soup = BeautifulSoup(html, "html.parser")
             product_cards = soup.select("div[data-component-type='s-search-result']")
 
             for card in product_cards:
-                # URL
-                url_tag = card.select_one(
-                    "a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal"
-                ) or card.select_one("a.a-link-normal.s-no-outline")
-                product_url = "https://www.amazon.in" + url_tag["href"] if url_tag else "N/A"
+                url_tag = card.select_one("a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal") \
+                           or card.select_one("a.a-link-normal.s-no-outline")
+                product_url = f"https://{domain}" + url_tag["href"] if url_tag else "N/A"
 
-                # Product name
-                name_tag = card.select_one(
-                    "h2.a-size-base-plus.a-spacing-none.a-color-base.a-text-normal"
-                ) or card.select_one("h2.a-size-medium.a-spacing-none.a-color-base.a-text-normal")
+                name_tag = card.select_one("h2.a-size-base-plus.a-spacing-none.a-color-base.a-text-normal") \
+                           or card.select_one("h2.a-size-medium.a-spacing-none.a-color-base.a-text-normal")
                 name = name_tag.get_text(strip=True) if name_tag else "N/A"
 
-                # Price
                 price_tag = card.select_one("span.a-price > span.a-offscreen") or card.select_one("span.a-color-price")
                 raw_price = price_tag.text.strip() if price_tag else "NA"
 
-                price_nums = [p for p in re.findall(r"[\d,]+(?:\.\d+)?", raw_price) if p.strip()]
+                price_nums = re.findall(r'[\d,]+(?:\.\d+)?', raw_price)
                 if not price_nums:
-                    # skip items without price (mirrors your original)
                     continue
-
                 try:
-                    price_value = int(float(price_nums[0].replace(",", "")))
+                    price_value = float(price_nums[0].replace(",", ""))
                 except ValueError:
                     continue
 
-                currency_match = re.search(r"([$€£₹]|Rs)", raw_price)
+                # 💱 Universal currency detection
+                currency_match = re.search(
+                    r'(?:'
+                    r'[\$€£₹¥₩₽₺₫₴₦₱₵₲₡₸₭₣₥₧₯₰₳₢₣₤₥₦₧₩₫₭₮₯₱₲₳₴₺₼₾₿]|'
+                    r'د\.إ|ر\.س|ج\.م|₨|'
+                    r'[A-Z]{3}'
+                    r')', raw_price
+                )
                 currency = currency_match.group(0) if currency_match else "NA"
 
-                # Rating
                 rating_tag = card.select_one("span.a-icon-alt")
                 rating = rating_tag.get_text(strip=True).replace("out of 5 stars", "").strip() if rating_tag else "N/A"
 
                 scraped_data.append({
-                        "BRAND": brand,
-                        "PRODUCT": product,
-                        "OEM NUMBER": oem_number or "NA",
-                        "ASIN NUMBER": asin_number or "NA",
-                        "WEBSITE": "Amazon",
-                        "PRODUCT NAME": name,
-                        "PRICE": price_value,
-                        "CURRENCY": currency,
-                        "SELLER RATING": rating,
-                        "DATE SCRAPED": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                        "SOURCE URL": product_url,
-                    })
+                    "BRAND": brand,
+                    "PRODUCT": product,
+                    "OEM NUMBER": oem_number or "NA",
+                    "ASIN NUMBER": asin_number or "NA",
+                    "WEBSITE": f"Amazon.{domain.split('.')[-1]}",
+                    "PRODUCT NAME": name,
+                    "PRICE": price_value,
+                    "CURRENCY": currency,
+                    "SELLER RATING": rating,
+                    "DATE SCRAPED": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "SOURCE URL": product_url,
+                })
 
-            # if scraped_data found, persist and return
             if scraped_data:
                 try:
-                    save_to_excel("Amazon", scraped_data)
+                    save_to_excel(f"Amazon_{country_code.upper()}", scraped_data)
                 except Exception:
-                    # don't fail the scrape if saving errors
                     pass
                 driver.quit()
                 return {"data": scraped_data}
             else:
-                # no items found — possible render issue; retry
                 driver.quit()
                 time.sleep(random.uniform(4, 10))
                 continue
 
-        except Exception as e:
-            # attempt failed, log and retry
-            try:
-                traceback.print_exc()
-            except Exception:
-                pass
+        except Exception:
+            traceback.print_exc()
             try:
                 driver.quit()
             except Exception:
@@ -228,5 +210,4 @@ def scrape_amazon(brand, product):
             time.sleep(random.uniform(4, 12) * attempt)
             continue
 
-    # all attempts exhausted
-    return {"error": "Blocked or failed after retries — consider using proxies or a scraping API for higher reliability."}
+    return {"error": f"Blocked or failed after retries for Amazon.{domain}"}

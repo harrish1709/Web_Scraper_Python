@@ -4,7 +4,7 @@ from scrapers.amazon_scraper import scrape_amazon
 from scrapers.flipkart_scraper import scrape_flipkart
 from scrapers.ebay_scraper import scrape_ebay
 from scrapers.snapdeal_scraper import scrape_snapdeal
-import time, random
+import time,random
 
 app = Flask(__name__)
 
@@ -27,7 +27,6 @@ def index():
             website = request.form.get("website", "").lower().strip()
             oem_number = request.form.get("oem_number", "").strip()
             asin_number = request.form.get("asin_number", "").strip()
-            country_code = request.form.get("country_code", "US").upper()
             file = request.files.get("file")
 
             # --- Bulk Upload ---
@@ -41,6 +40,7 @@ def index():
                     oem = str(row.get("OEM Number", "")).strip()
                     asin = str(row.get("ASIN Number", "")).strip()
 
+                    # Skip rows missing required fields
                     if not brand or not product:
                         continue
 
@@ -52,7 +52,7 @@ def index():
                         scraper = SCRAPERS[site_name]
 
                         if site_name == "amazon":
-                            data = scraper(country_code, brand, product)
+                            data = scraper(brand,product)
                         else:
                             data = scraper(brand, product, oem, asin)
 
@@ -69,6 +69,7 @@ def index():
 
             # --- Manual Input ---
             else:
+                # Require brand and product for manual entry
                 if not brand or not product:
                     error = "Both Brand and Product fields are required."
                 else:
@@ -78,12 +79,12 @@ def index():
                         if site not in SCRAPERS:
                             continue
                         scraper = SCRAPERS[site]
-
+                       
                         if site == "amazon":
-                            data = scraper(country_code, brand, product)
+                            data = scraper(brand,product)
                         else:
                             data = scraper(brand, product, oem_number, asin_number)
-
+                           
                         if "error" in data:
                             error = data["error"]
                         else:
@@ -91,6 +92,7 @@ def index():
                                 d["WEBSITE"] = site.capitalize()
                                 results.append(d)
 
+            # --- If nothing scraped and no explicit error ---
             if not results and not error:
                 error = "No results found. Please check your input or try again later."
 

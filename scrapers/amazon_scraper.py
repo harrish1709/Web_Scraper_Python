@@ -98,7 +98,7 @@ def scrape_amazon(brand, product):
 
             # small human-like warmup navigation
             try:
-                driver.get("https://www.amazon.com/")
+                driver.get("https://www.amazon.in/")
                 time.sleep(random.uniform(1.2, 2.8))
                 # Accept possible consent popups by attempting to click common selectors (non-fatal)
                 try:
@@ -121,7 +121,7 @@ def scrape_amazon(brand, product):
 
             # 🧩 Build simplified search URL (only brand + product)
             query = "+".join([k for k in [brand, product] if k])
-            search_url = f"https://www.amazon.com/s?k={query}"
+            search_url = f"https://www.amazon.in/s?k={query}"
    
             driver.get(search_url)
 
@@ -157,7 +157,7 @@ def scrape_amazon(brand, product):
                 url_tag = card.select_one(
                     "a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal"
                 ) or card.select_one("a.a-link-normal.s-no-outline")
-                product_url = "https://www.amazon.com" + url_tag["href"] if url_tag else "N/A"
+                product_url = "https://www.amazon.in" + url_tag["href"] if url_tag else "N/A"
 
                 # Product name
                 name_tag = card.select_one(

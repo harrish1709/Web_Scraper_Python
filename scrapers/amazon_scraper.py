@@ -157,7 +157,7 @@ def scrape_amazon(brand, product):
                 url_tag = card.select_one(
                     "a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal"
                 ) or card.select_one("a.a-link-normal.s-no-outline")
-                product_url = "https://www.amazon.in" + url_tag["href"] if url_tag else "N/A"
+                product_url = "https://www.amazon.com" + url_tag["href"] if url_tag else "N/A"
 
                 # Product name
                 name_tag = card.select_one(

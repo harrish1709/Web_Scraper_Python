@@ -80,7 +80,7 @@ def index():
                             continue
                         scraper = SCRAPERS[site]
                         
-                        if site_name == "amazon":
+                        if site == "amazon":
                             data = scraper(brand,product)
                         else:
                             data = scraper(brand, product, oem, asin)

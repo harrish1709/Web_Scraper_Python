@@ -175,13 +175,13 @@ def scrape_amazon(brand, product):
                 price_value = int(float(price_nums[0].replace(",", ""))) if price_nums else "NA"
 
                 currency_match = re.search(
-   r'(?:'
-   r'[\$€£₹¥₩₽₺₫₴₦₱₵₲₡₸₭₣₥₧₯₰₳₢₣₤₥₦₧₩₫₭₮₯₱₲₳₴₺₼₾₿]|'  # Common currency symbols
-   r'د\.إ|ر\.س|ج\.م|₨|'                   # Arabic-region symbols (AED, SAR, EGP, PKR, etc.)
-   r'[A-Z]{3}'                            # ISO 4217 codes (USD, AED, EUR, etc.)
-   r')',
-   raw_price
-)
+                   r'(?:'
+                   r'[\$€£₹¥₩₽₺₫₴₦₱₵₲₡₸₭₣₥₧₯₰₳₢₣₤₥₦₧₩₫₭₮₯₱₲₳₴₺₼₾₿]|'  # Common currency symbols
+                   r'د\.إ|ر\.س|ج\.م|₨|'                   # Arabic-region symbols (AED, SAR, EGP, PKR, etc.)
+                   r'[A-Z]{3}'                            # ISO 4217 codes (USD, AED, EUR, etc.)
+                   r')',
+                   raw_price
+                )
                 currency = currency_match.group(0) if currency_match else "NA"
 
                 # Rating

@@ -4,9 +4,11 @@ from scrapers.amazon_scraper import scrape_amazon
 from scrapers.flipkart_scraper import scrape_flipkart
 from scrapers.ebay_scraper import scrape_ebay
 from scrapers.snapdeal_scraper import scrape_snapdeal
-import time,random
+import time, random, os
 
 app = Flask(__name__)
+
+selected_amazon_domain = None
 
 SCRAPERS = {
     "amazon": scrape_amazon,
@@ -27,7 +29,13 @@ def index():
             website = request.form.get("website", "").lower().strip()
             oem_number = request.form.get("oem_number", "").strip()
             asin_number = request.form.get("asin_number", "").strip()
+            amazon_country = request.form.get("amazon_country", "amazon.com").strip()
+            if not amazon_country:
+                amazon_country = "amazon.com"
             file = request.files.get("file")
+
+            # ✅ Always store the user's Amazon country selection globally
+            os.environ["SELECTED_AMAZON_DOMAIN"] = amazon_country
 
             # --- Bulk Upload ---
             if file and file.filename:
@@ -40,10 +48,10 @@ def index():
                     oem = str(row.get("OEM Number", "")).strip()
                     asin = str(row.get("ASIN Number", "")).strip()
 
-                    # Skip rows missing required fields
                     if not brand or not product:
                         continue
 
+                    # If "All Websites" is selected, scrape all except Amazon uses selected domain
                     sites_to_scrape = SCRAPERS.keys() if not site else [site]
 
                     for site_name in sites_to_scrape:
@@ -52,7 +60,8 @@ def index():
                         scraper = SCRAPERS[site_name]
 
                         if site_name == "amazon":
-                            data = scraper(brand,product)
+                            os.environ["SELECTED_AMAZON_DOMAIN"] = amazon_country
+                            data = scraper(brand, product)
                         else:
                             data = scraper(brand, product, oem, asin)
 
@@ -64,27 +73,30 @@ def index():
                             error = data["error"]
 
                         if site_name == "amazon":
-                            wait = random.uniform(10, 25)
-                            time.sleep(wait)
+                            time.sleep(random.uniform(10, 25))
 
             # --- Manual Input ---
             else:
-                # Require brand and product for manual entry
                 if not brand or not product:
                     error = "Both Brand and Product fields are required."
                 else:
-                    sites_to_scrape = SCRAPERS.keys() if not website else [website]
+                    sites_to_scrape = SCRAPERS.keys() if website in ("", "allwebsite") else [website]
 
                     for site in sites_to_scrape:
                         if site not in SCRAPERS:
                             continue
+
                         scraper = SCRAPERS[site]
-                       
+
+                        # Set Amazon domain if provided
                         if site == "amazon":
-                            data = scraper(brand,product)
+                            os.environ["SELECTED_AMAZON_DOMAIN"] = amazon_country
+                            print(f"🟡 Using Amazon domain: {os.environ.get('SELECTED_AMAZON_DOMAIN')}")
+                            data = scraper(brand, product)
                         else:
                             data = scraper(brand, product, oem_number, asin_number)
-                           
+
+                        # Handle errors or append data
                         if "error" in data:
                             error = data["error"]
                         else:
@@ -92,7 +104,6 @@ def index():
                                 d["WEBSITE"] = site.capitalize()
                                 results.append(d)
 
-            # --- If nothing scraped and no explicit error ---
             if not results and not error:
                 error = "No results found. Please check your input or try again later."
 

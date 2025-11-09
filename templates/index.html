@@ -86,10 +86,37 @@
             <div class="mb-3 text-center border border-dashed upload-zone p-4 rounded">
               <input type="file" name="file" class="form-control mb-2" accept=".csv,.xlsx,.xls" required>
               <small class="text-muted">
-                Upload CSV or Excel file with columns: 
+                Upload CSV or Excel file with columns:
                 <b>Brand</b>, <b>Product</b>, <b>Website Name</b>, <b>OEM Number</b>, <b>ASIN Number</b>
               </small>
             </div>
+
+            <!-- Amazon Region for Bulk Upload -->
+            <div class="mb-3" id="amazonCountrySectionBulk">
+              <label class="form-label fw-semibold">Amazon Region</label>
+              <select name="amazon_country" class="form-select">
+                <option value="amazon.com">Amazon.com (US)</option>
+                <option value="amazon.co.uk">Amazon UK</option>
+                <option value="amazon.in">Amazon India</option>
+                <option value="amazon.ae">Amazon UAE</option>
+                <option value="amazon.de">Amazon Germany</option>
+                <option value="amazon.fr">Amazon France</option>
+                <option value="amazon.it">Amazon Italy</option>
+                <option value="amazon.es">Amazon Spain</option>
+                <option value="amazon.ca">Amazon Canada</option>
+                <option value="amazon.com.au">Amazon Australia</option>
+                <option value="amazon.sg">Amazon Singapore</option>
+                <option value="amazon.sa">Amazon Saudi Arabia</option>
+                <option value="amazon.nl">Amazon Netherlands</option>
+                <option value="amazon.pl">Amazon Poland</option>
+                <option value="amazon.se">Amazon Sweden</option>
+                <option value="amazon.co.jp">Amazon Japan</option>
+                <option value="amazon.com.br">Amazon Brazil</option>
+                <option value="amazon.com.mx">Amazon Mexico</option>
+              </select>
+              <small class="text-muted">Used when scraping Amazon or All Websites.</small>
+            </div>
+
             <button type="submit" class="btn btn-success w-100">
               <i class="bi bi-cloud-arrow-up me-2"></i>Upload & Scrape
             </button>
@@ -121,13 +148,46 @@
             <div class="mb-3">
               <label class="form-label fw-semibold">Website (optional)</label>
               <select name="website" class="form-select">
-                <option value="">-- All Websites --</option>
+                <option value="allwebsite">-- All Websites --</option>
                 <option value="amazon">Amazon</option>
                 <option value="flipkart">Flipkart</option>
                 <option value="ebay">eBay</option>
                 <option value="snapdeal">Snapdeal</option>
               </select>
             </div>
+            <div class="mb-3" id="amazonCountrySection" style="display: none;">
+              <label class="form-label fw-semibold">Amazon Region</label>
+              <select name="amazon_country" class="form-select">
+                <option value="amazon.com">Amazon.com (US)</option>
+                <option value="amazon.co.uk">Amazon UK</option>
+                <option value="amazon.in">Amazon India</option>
+                <option value="amazon.ae">Amazon UAE</option>
+                <option value="amazon.de">Amazon Germany</option>
+                <option value="amazon.fr">Amazon France</option>
+                <option value="amazon.it">Amazon Italy</option>
+                <option value="amazon.es">Amazon Spain</option>
+                <option value="amazon.ca">Amazon Canada</option>
+                <option value="amazon.com.au">Amazon Australia</option>
+                <option value="amazon.sg">Amazon Singapore</option>
+                <option value="amazon.sa">Amazon Saudi Arabia</option>
+                <option value="amazon.nl">Amazon Netherlands</option>
+                <option value="amazon.pl">Amazon Poland</option>
+                <option value="amazon.se">Amazon Sweden</option>
+                <option value="amazon.co.jp">Amazon Japan</option>
+                <option value="amazon.com.br">Amazon Brazil</option>
+                <option value="amazon.com.mx">Amazon Mexico</option>
+              </select>
+            </div>
+
+            <script>
+              const websiteSelect = document.querySelector('select[name="website"]');
+              const amazonCountrySection = document.getElementById('amazonCountrySection');
+
+              websiteSelect.addEventListener('change', () => {
+                amazonCountrySection.style.display = (websiteSelect.value === 'amazon' || websiteSelect.value === '' || websiteSelect.value === 'allwebsite') ? 'block' : 'none';
+              });
+            </script>
+
             <button type="submit" class="btn btn-primary w-100">
               <i class="bi bi-search me-2"></i>Search Product
             </button>

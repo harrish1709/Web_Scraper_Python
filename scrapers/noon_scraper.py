@@ -14,7 +14,7 @@ def scrape_noon(brand, product, oem_number=None, asin_number=None):
     options.add_argument("--window-size=1920,1080")
     options.add_argument("--disable-blink-features=AutomationControlled")
 
-    driver = uc.Chrome(version_main=138, options=options)
+    driver = uc.Chrome(options=options)
 
     try:
 

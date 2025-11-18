@@ -4,6 +4,9 @@ from scrapers.amazon_scraper import scrape_amazon
 from scrapers.flipkart_scraper import scrape_flipkart
 from scrapers.ebay_scraper import scrape_ebay
 from scrapers.snapdeal_scraper import scrape_snapdeal
+from scrapers.amitretail_scraper import scrape_amitretail
+from scrapers.noon_scraper import scrape_noon
+from scrapers.sharafdg_scraper import scrape_sharafdg
 import time, random, os
 
 app = Flask(__name__)
@@ -14,7 +17,10 @@ SCRAPERS = {
     "amazon": scrape_amazon,
     "flipkart": scrape_flipkart,
     "ebay": scrape_ebay,
-    "snapdeal": scrape_snapdeal
+    "snapdeal": scrape_snapdeal,
+    "amitretail":scrape_amitretail,
+    "noon":scrape_noon,
+    "sharafdg":scrape_sharafdg
 }
 
 @app.route("/", methods=["GET", "POST"])
@@ -113,4 +119,4 @@ def index():
     return render_template("index.html", results=results, error=error)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(port=8000)

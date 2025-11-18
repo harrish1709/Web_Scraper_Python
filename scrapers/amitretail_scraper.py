@@ -20,7 +20,7 @@ def scrape_amitretail(brand, product, oem_number=None, asin_number=None):
         "Chrome/141.0.7390.122 Safari/537.36"
     )
 
-    driver = uc.Chrome(version_main=138, options=options)
+    driver = uc.Chrome(options=options)
 
     try:
         polite_delay()

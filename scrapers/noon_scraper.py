@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import time, re
 from datetime import datetime
 from scrapers.utils import polite_delay, save_to_excel
-
+import random
 
 def scrape_noon(brand, product, oem_number=None, asin_number=None):
 

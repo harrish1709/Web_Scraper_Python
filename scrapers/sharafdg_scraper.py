@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import time, re
 from scrapers.utils import polite_delay, save_to_excel
 from datetime import datetime
-
+import random
 
 def scrape_sharafdg(brand, product, oem_number=None, asin_number=None):
     # Start undetected Chrome (headless OK!)

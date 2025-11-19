@@ -61,7 +61,7 @@ def scrape_sharafdg(brand, product, oem_number=None, asin_number=None):
             product_url = url_tag["href"] if url_tag else "N/A"
 
             # Name
-            name_tag = card.select_one("h4.card-title")
+            name_tag = card.select_one("div.slider--prd-info")
             name = name_tag.get_text(strip=True) if name_tag else "N/A"
 
             # Price

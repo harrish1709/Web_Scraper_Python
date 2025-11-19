@@ -7,6 +7,7 @@ from scrapers.snapdeal_scraper import scrape_snapdeal
 from scrapers.amitretail_scraper import scrape_amitretail
 from scrapers.noon_scraper import scrape_noon
 from scrapers.sharafdg_scraper import scrape_sharafdg
+from scrapers.westmarine_scraper import scrape_westmarine
 import time, random, os
 
 app = Flask(__name__)

@@ -49,7 +49,6 @@ def scrape_westmarine(brand, product, oem_number=None, asin_number=None):
             time.sleep(1)
 
         # Parse
-        soup = BeautifulSoup(driver.page_source, "html.parser")
         product_cards = driver.find_elements("css selector", "div.product")
 
         scraped_data = []

@@ -36,7 +36,7 @@ def scrape_sharafdg(brand, product, oem_number=None, asin_number=None):
             keywords = [brand, product, oem_number] if oem_number else [brand, product]
 
         query = "+".join([k for k in keywords if k])
-        url = f"https://uae.sharafdg.com/?q={query}"
+        url = f"https://uae.sharafdg.com/?q={query}&post_type=product"
         driver.get(url)
 
         # GIVE ALGOLIA JS TIME TO LOAD RENDERED RESULTS

@@ -36,7 +36,7 @@ def scrape_westmarine(brand, product, oem_number=None, asin_number=None):
             keywords = [brand, product, oem_number] if oem_number else [brand, product]
 
         query = "+".join([k for k in keywords if k])
-        url = f"https://uae.sharafdg.com/?q={query}&post_type=product"
+        url = f"https://www.westmarine.com/search?q={query}&lang=en_US"
         driver.get(url)
 
         # GIVE ALGOLIA JS TIME TO LOAD RENDERED RESULTS

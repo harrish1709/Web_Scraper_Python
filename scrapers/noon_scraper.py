@@ -75,8 +75,7 @@ def scrape_noon(brand, product, oem_number=None, asin_number=None):
             price_value = float(price_nums[0].replace(",", "")) if price_nums else 0
 
             # Currency
-            currency_tag = card.select_one('span[class*="currency"], span[class*="isCurrencySymbol"]')
-            currency = currency_tag.get_text(strip=True) if currency_tag else "AED"
+            currency = "AED"
 
             scraped_data.append({
                 "BRAND": brand,

@@ -52,32 +52,29 @@ def scrape_westmarine(brand, product, oem_number=None, asin_number=None):
         soup = BeautifulSoup(driver.page_source, "html.parser")
         product_cards = soup.select("div.product")
 
-        scraped_data = []
-
         for card in product_cards:
-
-            # URL
-            url_tag = card.select_one("a.link")
+        
+            # Product URL
+            url_tag = card.select_one("a.link.font-weight-medium")
             product_url = url_tag["href"] if url_tag else "N/A"
-
-            # Name
-            name_tag = card.select_one("a.link")
+        
+            # Product Name
+            name_tag = card.select_one("a.link.font-weight-medium")
             name = name_tag.get_text(strip=True) if name_tag else "N/A"
-
+        
             # Price
-            price_tag = card.select_one("spam.item-price")
+            price_tag = card.select_one("span.item-price")
             raw_price = price_tag.get_text(strip=True) if price_tag else "0"
-
+        
             price_nums = re.findall(r'[\d,]+(?:\.\d+)?', raw_price)
             price_value = float(price_nums[0].replace(",", "")) if price_nums else 0
-
-            # Currency
-            currency="$"
-
-            #Rating
+        
+            # Rating
             rating_tag = card.select_one("div.refinebar-rating-options-container")
             if rating_tag:
-                rating = rating_tag.get_text(strip=True).replace("(", "").replace(")", "")
+                text = rating_tag.get_text(strip=True)
+                match = re.search(r"\(([\d\.]+)\)", text)
+                rating = match.group(1) if match else "N/A"
             else:
                 rating = "N/A"
 

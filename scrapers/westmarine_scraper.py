@@ -50,34 +50,37 @@ def scrape_westmarine(brand, product, oem_number=None, asin_number=None):
 
         # Parse
         soup = BeautifulSoup(driver.page_source, "html.parser")
-        product_cards = soup.select("div.product")
+        product_cards = driver.find_elements("css selector", "div.product")
 
-        scraped_data=[]
-
+        scraped_data = []
+        
         for card in product_cards:
-        
             # Product URL
-            url_tag = card.select_one("a.link.font-weight-medium")
-            product_url = url_tag["href"] if url_tag else "N/A"
-        
-            # Product Name
-            name_tag = card.select_one("a.link.font-weight-medium")
-            name = name_tag.get_text(strip=True) if name_tag else "N/A"
+            try:
+                url_tag = card.find_element("css selector", "a.link.font-weight-medium")
+                product_url = url_tag.get_attribute("href")
+                name = url_tag.text.strip()
+            except:
+                product_url = "N/A"
+                name = "N/A"
         
             # Price
-            price_tag = card.select_one("span.item-price")
-            raw_price = price_tag.get_text(strip=True) if price_tag else "0"
+            try:
+                price_tag = card.find_element("css selector", "span.item-price")
+                raw_price = price_tag.text.strip()
+            except:
+                raw_price = "0"
         
+            # Convert price
             price_nums = re.findall(r'[\d,]+(?:\.\d+)?', raw_price)
             price_value = float(price_nums[0].replace(",", "")) if price_nums else 0
         
             # Rating
-            rating_tag = card.select_one("div.refinebar-rating-options-container")
-            if rating_tag:
-                text = rating_tag.get_text(strip=True)
-                match = re.search(r"\(([\d\.]+)\)", text)
+            try:
+                rating_tag = card.find_element("css selector", "div.refinebar-rating-options-container")
+                match = re.search(r"\(([\d\.]+)\)", rating_tag.text)
                 rating = match.group(1) if match else "N/A"
-            else:
+            except:
                 rating = "N/A"
 
             scraped_data.append({

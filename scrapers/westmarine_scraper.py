@@ -52,6 +52,8 @@ def scrape_westmarine(brand, product, oem_number=None, asin_number=None):
         soup = BeautifulSoup(driver.page_source, "html.parser")
         product_cards = soup.select("div.product")
 
+        scraped_data=[]
+
         for card in product_cards:
         
             # Product URL

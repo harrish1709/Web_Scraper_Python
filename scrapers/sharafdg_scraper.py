@@ -50,7 +50,7 @@ def scrape_sharafdg(brand, product, oem_number=None, asin_number=None):
 
         # Parse
         soup = BeautifulSoup(driver.page_source, "html.parser")
-        product_cards = soup.select('div[class*="product-wrapper"]')
+        product_cards = soup.select("div.product-wrapper")
 
         scraped_data = []
 
@@ -75,7 +75,7 @@ def scrape_sharafdg(brand, product, oem_number=None, asin_number=None):
             currency="AED"
 
             #Rating
-            rating_tag = card.select_one(".product-rating-count")
+            rating_tag = card.select_one("span.product-rating-count")
             if rating_tag:
                 rating = rating_tag.get_text(strip=True).replace("(", "").replace(")", "")
             else:

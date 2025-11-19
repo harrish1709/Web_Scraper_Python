@@ -23,7 +23,7 @@ def scrape_noon(brand, product, oem_number=None, asin_number=None):
     options.add_argument(f"--user-agent={random.choice(user_agents)}")
 
 
-    driver = uc.Chrome(options=options)
+    driver = uc.Chrome(version_main=141, options=options)
 
     try:
 

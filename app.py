@@ -20,7 +20,8 @@ SCRAPERS = {
     "snapdeal": scrape_snapdeal,
     "amitretail":scrape_amitretail,
     "noon":scrape_noon,
-    "sharafdg":scrape_sharafdg
+    "sharafdg":scrape_sharafdg,
+    "westmarine":scrape_westmarine
 }
 
 @app.route("/", methods=["GET", "POST"])

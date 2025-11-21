@@ -132,81 +132,81 @@ def scrape_westmarine(brand, product, oem_number=None, asin_number=None, headles
             product_cards = soup.select("div.product")
 
             for card in product_cards:
-            # Product URL
-            try:
-                url_tag = card.find_element("css selector", "a.link.font-weight-medium")
-                product_url = url_tag.get_attribute("href")
-                name = url_tag.text.strip()
-            except:
-                product_url = "N/A"
-                name = "N/A"
-        
-            # Price
-            try:
-                price_tag = card.find_element("css selector", "span.item-price")
-                raw_price = price_tag.text.strip()
-            except:
-                raw_price = "0"
-        
-            # Convert price
-            price_nums = re.findall(r'[\d,]+(?:\.\d+)?', raw_price)
-            price_value = float(price_nums[0].replace(",", "")) if price_nums else 0
-
-            currency="$"
-        
-            # Rating
-            try:
-                rating_tag = card.find_element("css selector", "div.refinebar-rating-options-container")
-                match = re.search(r"\(([\d\.]+)\)", rating_tag.text)
-                rating = match.group(1) if match else "N/A"
-            except:
-                rating = "N/A"
-
-            scraped_data.append({
-                "BRAND": brand,
-                "PRODUCT": product,
-                "OEM NUMBER": oem_number or "NA",
-                "ASIN NUMBER": asin_number or "NA",
-                "WEBSITE": "AmitRetail",
-                "PRODUCT NAME": name,
-                "PRICE": price_value,
-                "CURRENCY": currency,
-                "SELLER RATING": rating,
-                "DATE SCRAPED": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "SOURCE URL": product_url,
-            })
+                # Product URL
+                try:
+                    url_tag = card.find_element("css selector", "a.link.font-weight-medium")
+                    product_url = url_tag.get_attribute("href")
+                    name = url_tag.text.strip()
+                except:
+                    product_url = "N/A"
+                    name = "N/A"
             
-            if scraped_data:
+                # Price
                 try:
-                    save_to_excel("WestMarine", scraped_data)
-                except Exception:
-                    pass
+                    price_tag = card.find_element("css selector", "span.item-price")
+                    raw_price = price_tag.text.strip()
+                except:
+                    raw_price = "0"
+            
+                # Convert price
+                price_nums = re.findall(r'[\d,]+(?:\.\d+)?', raw_price)
+                price_value = float(price_nums[0].replace(",", "")) if price_nums else 0
+    
+                currency="$"
+            
+                # Rating
+                try:
+                    rating_tag = card.find_element("css selector", "div.refinebar-rating-options-container")
+                    match = re.search(r"\(([\d\.]+)\)", rating_tag.text)
+                    rating = match.group(1) if match else "N/A"
+                except:
+                    rating = "N/A"
+    
+                scraped_data.append({
+                    "BRAND": brand,
+                    "PRODUCT": product,
+                    "OEM NUMBER": oem_number or "NA",
+                    "ASIN NUMBER": asin_number or "NA",
+                    "WEBSITE": "AmitRetail",
+                    "PRODUCT NAME": name,
+                    "PRICE": price_value,
+                    "CURRENCY": currency,
+                    "SELLER RATING": rating,
+                    "DATE SCRAPED": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "SOURCE URL": product_url,
+                })
+                
+                if scraped_data:
+                    try:
+                        save_to_excel("WestMarine", scraped_data)
+                    except Exception:
+                        pass
+                    try:
+                        driver.quit()
+                    except Exception:
+                        pass
+                    return {"data": scraped_data}
+    
                 try:
                     driver.quit()
                 except Exception:
                     pass
-                return {"data": scraped_data}
-
-            try:
-                driver.quit()
-            except Exception:
-                pass
-            time.sleep(random.uniform(4, 10) * attempt)
-            continue
-
-        except Exception as e:
-            try:
-                traceback.print_exc()
-            except Exception:
-                pass
-            try:
-                if driver:
-                    driver.quit()
-            except Exception:
-                pass
-            time.sleep(random.uniform(3, 10) * attempt)
-            continue
-
-    return {
-        "error": "Blocked or failed after multiple retries — consider rotating proxies, using residential proxies, or reducing headless stealth (set headless=False)."
-    }
+                time.sleep(random.uniform(4, 10) * attempt)
+                continue
+    
+            except Exception as e:
+                try:
+                    traceback.print_exc()
+                except Exception:
+                    pass
+                try:
+                    if driver:
+                        driver.quit()
+                except Exception:
+                    pass
+                time.sleep(random.uniform(3, 10) * attempt)
+                continue
+    
+        return {
+            "error": "Blocked or failed after multiple retries — consider rotating proxies, using residential proxies, or reducing headless stealth (set headless=False)."
+        }

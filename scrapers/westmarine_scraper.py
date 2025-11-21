@@ -75,7 +75,7 @@ def scrape_westmarine(brand, product):
         driver = None
 
         try:
-            driver = uc.Chrome(options=options)
+            driver = uc.Chrome(version_main=141, options=options)
             driver.set_page_load_timeout(45)
 
             # apply stealth mask

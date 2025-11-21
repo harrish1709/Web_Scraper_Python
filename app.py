@@ -70,6 +70,8 @@ def index():
                         if site_name == "amazon":
                             os.environ["SELECTED_AMAZON_DOMAIN"] = amazon_country
                             data = scraper(brand, product)
+                        elif site_name == "westmarine":
+                            data = scraper(brand, product)
                         else:
                             data = scraper(brand, product, oem, asin)
 
@@ -100,6 +102,8 @@ def index():
                         if site == "amazon":
                             os.environ["SELECTED_AMAZON_DOMAIN"] = amazon_country
                             print(f"🟡 Using Amazon domain: {os.environ.get('SELECTED_AMAZON_DOMAIN')}")
+                            data = scraper(brand, product)
+                        elif site == "westmarine":
                             data = scraper(brand, product)
                         else:
                             data = scraper(brand, product, oem_number, asin_number)

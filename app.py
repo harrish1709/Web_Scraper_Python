@@ -7,7 +7,6 @@ from scrapers.snapdeal_scraper import scrape_snapdeal
 from scrapers.amitretail_scraper import scrape_amitretail
 from scrapers.noon_scraper import scrape_noon
 from scrapers.sharafdg_scraper import scrape_sharafdg
-from scrapers.westmarine_scraper import scrape_westmarine
 import time, random, os
 
 app = Flask(__name__)
@@ -21,8 +20,7 @@ SCRAPERS = {
     "snapdeal": scrape_snapdeal,
     "amitretail":scrape_amitretail,
     "noon":scrape_noon,
-    "sharafdg":scrape_sharafdg,
-    "westmarine":scrape_westmarine
+    "sharafdg":scrape_sharafdg
 }
 
 @app.route("/", methods=["GET", "POST"])
@@ -70,8 +68,6 @@ def index():
                         if site_name == "amazon":
                             os.environ["SELECTED_AMAZON_DOMAIN"] = amazon_country
                             data = scraper(brand, product)
-                        elif site_name == "westmarine":
-                            data = scraper(brand, product)
                         else:
                             data = scraper(brand, product, oem, asin)
 
@@ -102,8 +98,6 @@ def index():
                         if site == "amazon":
                             os.environ["SELECTED_AMAZON_DOMAIN"] = amazon_country
                             print(f"🟡 Using Amazon domain: {os.environ.get('SELECTED_AMAZON_DOMAIN')}")
-                            data = scraper(brand, product)
-                        elif site == "westmarine":
                             data = scraper(brand, product)
                         else:
                             data = scraper(brand, product, oem_number, asin_number)

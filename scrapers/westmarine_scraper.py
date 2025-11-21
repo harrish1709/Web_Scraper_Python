@@ -44,9 +44,11 @@ def _human_scroll(driver, passes=8):
         time.sleep(random.uniform(0.6, 1.2))
 
 
-def scrape_westmarine(brand, product, oem_number=None, asin_number=None):
+def scrape_westmarine(brand, product):
     max_retries = 3
     headless = True
+    oem_number = None
+    asin_number = None
     scraped_data = []
 
     query_terms = [t for t in [brand, product, oem_number, asin_number] if t]

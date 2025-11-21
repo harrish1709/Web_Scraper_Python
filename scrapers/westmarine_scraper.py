@@ -187,7 +187,6 @@ def scrape_westmarine(brand, product, oem_number=None, asin_number=None, headles
                     pass
                 return {"data": scraped_data}
 
-            # no data found: backoff and retry
             try:
                 driver.quit()
             except Exception:
@@ -196,15 +195,8 @@ def scrape_westmarine(brand, product, oem_number=None, asin_number=None, headles
             continue
 
         except Exception as e:
-            # record stack for debugging, save screenshot if possible
             try:
                 traceback.print_exc()
-            except Exception:
-                pass
-            try:
-                if driver:
-                    debug_filename = f"/tmp/westmarine_err_{int(time.time())}.png"
-                    driver.save_screenshot(debug_filename)
             except Exception:
                 pass
             try:

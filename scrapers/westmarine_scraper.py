@@ -120,7 +120,7 @@ def scrape_westmarine(brand, product, oem_number=None, asin_number=None, headles
             block_indicators = [
                 "automated access", "Please verify you are a human", "CAPTCHA", "Enter the characters you see below"
             ]
-            if any(s.lower() in html.lower() for s in block_indicators)
+            if any(s.lower() in html.lower() for s in block_indicators):
                 try:
                     driver.quit()
                 except Exception:
